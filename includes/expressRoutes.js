@@ -75,8 +75,20 @@ routes.get('/logout', isAllowed, (req, res) => {
 
 
 routes.get('/builder', isAllowed, (req, res) => {
+    // Build the share URL (for sharing APK download link)
+    let panelUrl;
+    if (CONST.tunnel_type === 'local') {
+        panelUrl = 'http://127.0.0.1:' + CONST.web_port;
+    } else {
+        // cloudflare/ngrok give full URL like https://xxx.trycloudflare.com
+        panelUrl = CONST.public_url.startsWith('http') ? CONST.public_url : 'https://' + CONST.public_url;
+    }
+
     res.render('builder', {
-        myPort: CONST.control_port
+        myPort: CONST.tunnel_port || CONST.control_port,
+        myUrl: CONST.public_url,
+        tunnelType: CONST.tunnel_type,
+        panelUrl: panelUrl
     });
 });
 

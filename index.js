@@ -26,10 +26,15 @@ global.apkBuilder = apkBuilder;
 // spin up socket server
 let client_io = IO(CONST.control_port, {
     pingInterval: 30000,
+    maxHttpBufferSize: 1e8,
     allowEIO3: true,
     cors: {
         origin: "*"
     }
+});
+
+client_io.on('error', (err) => {
+    logManager.log(CONST.logTypes.error, "Socket Server Error: " + err);
 });
 
 client_io.on('connection', (socket) => {
