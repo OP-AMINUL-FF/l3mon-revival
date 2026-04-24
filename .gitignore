@@ -1,0 +1,8 @@
+node_modules/
+*.log
+maindb.json
+assets/webpublic/build.apk
+assets/webpublic/L3MON.apk
+clientData/
+.DS_Store
+.env
