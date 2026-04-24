@@ -46,7 +46,11 @@ chmod +x setup.sh
 ```
 
 #### **For Windows:**
-Double-click `setup.bat`.
+- **Option 1:** Double-click `setup.bat`.
+- **Option 2 (CMD/PowerShell):**
+  ```cmd
+  setup.bat
+  ```
 
 ### 2. Manual Setup
 If you prefer manual steps:
