@@ -24,7 +24,7 @@ if %errorlevel% neq 0 (
     echo [*] Java not found. Attempting auto-install via winget...
     winget install Oracle.JDK.17 -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
     if %errorlevel% neq 0 (
-        echo [!] Auto-install failed. Please install Java (JDK 17) manually.
+        echo [!] Auto-install failed. Please install Java JDK 17 manually.
         exit /b 1
     )
     echo [+] Java installed successfully.
