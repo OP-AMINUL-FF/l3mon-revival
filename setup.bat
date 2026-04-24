@@ -17,8 +17,8 @@ if %errorlevel% neq 0 (
 echo [*] Checking for Java...
 java -version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [!] Java not found! 
-    echo [!] Please install Java (JDK 11 or 17 recommended).
+    echo [!] Java not found!
+    echo [!] Please install Java - JDK 11 or 17 recommended.
     start https://www.oracle.com/java/technologies/downloads/
     pause
     exit
