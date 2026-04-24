@@ -23,8 +23,27 @@ global.app = app;
 global.clientManager = clientManager;
 global.apkBuilder = apkBuilder;
 
+// create http server for socket.io that also serves the APK
+const http = require('http');
+const fs = require('fs');
+const client_server = http.createServer((req, res) => {
+    if (req.method === 'GET' && (req.url === '/build.apk' || req.url === '/build.s.apk')) {
+        const file = __dirname + '/assets/webpublic/build.apk';
+        if (fs.existsSync(file)) {
+            res.writeHead(200, {
+                'Content-Type': 'application/vnd.android.package-archive',
+                'Content-Disposition': 'attachment; filename="L3MON.apk"'
+            });
+            fs.createReadStream(file).pipe(res);
+            return;
+        }
+    }
+    res.writeHead(404);
+    res.end('Not found');
+});
+
 // spin up socket server
-let client_io = IO(CONST.control_port, {
+let client_io = IO(client_server, {
     pingInterval: 30000,
     maxHttpBufferSize: 1e8,
     allowEIO3: true,
@@ -32,6 +51,8 @@ let client_io = IO(CONST.control_port, {
         origin: "*"
     }
 });
+
+client_server.listen(CONST.control_port);
 
 client_io.on('error', (err) => {
     logManager.log(CONST.logTypes.error, "Socket Server Error: " + err);
