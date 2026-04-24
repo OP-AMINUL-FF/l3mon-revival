@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<% include partials/head.ejs %>
+<%- include('partials/head') %>
 
 
 <body>
     <div class="ui container">
-        <% include partials/header.ejs %>
+        <%- include('partials/header') %>
         <div class="ui segment">
 
             <div id="dimmer" class="ui dimmer">
@@ -27,7 +27,7 @@
                     </div>
                     <div class="two wide field">
                         <label>:</label>
-                        <input type="number" id="portInput" placeholder="PORT" min="2048" max="25565"
+                        <input type="number" id="portInput" placeholder="PORT" min="1" max="65535"
                             title="This is the `control_port` set in the consts" value="<%= myPort %>">
                     </div>
 
@@ -111,7 +111,7 @@
         }
 
     </script>
-    <% include partials/footer.ejs %>
+    <%- include('partials/footer') %>
 </body>
 
 </html>
