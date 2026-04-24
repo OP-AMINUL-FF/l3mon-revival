@@ -7,7 +7,7 @@ echo ------------------------------------------------
 :: Check for Node.js
 node -v >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [*] Node.js not found. Attempting auto-install via winget...
+    echo [*] Node.js not found. Attempting auto-install...
     winget install OpenJS.NodeJS -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
     if %errorlevel% neq 0 (
         echo [!] Auto-install failed. Please install Node.js manually.
@@ -22,9 +22,24 @@ if %errorlevel% neq 0 (
 java -version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [*] Java not found. Attempting auto-install via winget...
-    winget install Oracle.JDK.17 -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
+    
+    :: Try Microsoft OpenJDK 17 first (highly reliable)
+    winget install Microsoft.OpenJDK.17 -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
+    
     if %errorlevel% neq 0 (
-        echo [!] Auto-install failed. Please install Java JDK 17 manually.
+        :: Try Oracle JDK 17 as fallback
+        winget install Oracle.JDK.17 -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
+    )
+    
+    if %errorlevel% neq 0 (
+        :: Try Eclipse Adoptium Temurin 17 as last resort
+        winget install EclipseAdoptium.Temurin.17 -e --silent --accept-source-agreements --accept-package-agreements >nul 2>&1
+    )
+
+    java -version >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo [!] Auto-install failed. Winget could not install Java.
+        echo [!] Please install Java JDK 17 manually.
         exit /b 1
     )
     echo [+] Java installed successfully.
