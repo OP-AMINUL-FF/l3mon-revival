@@ -7,7 +7,7 @@
                 <i class="mobile alternate icon"></i>
             </div>
             <div class="label">
-                <%= dyn.manf || 'Unknown' %> <%= dyn.model || 'Device' %>
+                <%= (dyn.device && dyn.device.manufacture) || 'Unknown' %> <%= (dyn.device && dyn.device.model) || 'Device' %>
             </div>
         </div>
         <div class="statistic">
@@ -15,7 +15,7 @@
                 <i class="android icon"></i>
             </div>
             <div class="label">
-                Android <%= dyn.release || '?' %>
+                Android <%= (dyn.device && dyn.device.version) || '?' %>
             </div>
         </div>
         <div class="statistic">
@@ -50,7 +50,7 @@
             <i class="large network wired middle aligned icon"></i>
             <div class="content">
                 <a class="header">IP Address</a>
-                <div class="description"><%= dyn.ip || 'Unknown' %></div>
+                <div class="description"><%= dyn.clientIP || 'Unknown' %></div>
             </div>
         </div>
         <div class="item">

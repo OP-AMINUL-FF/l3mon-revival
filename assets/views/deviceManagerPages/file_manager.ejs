@@ -15,7 +15,25 @@
         <tbody>
             <% pageData.forEach((item) => { %>
             <tr>
-                <td title="<%= item.path %>"><%= item.name %></td>
+                <td title="<%= item.path %>">
+                    <% let lName = item.name.toLowerCase(); %>
+                    <% if(item.isDir) { %>
+                        <i class="folder icon yellow"></i>
+                    <% } else if(lName.endsWith('.jpg') || lName.endsWith('.png') || lName.endsWith('.jpeg') || lName.endsWith('.gif')) { %>
+                        <i class="image icon purple"></i>
+                    <% } else if(lName.endsWith('.mp4') || lName.endsWith('.mkv') || lName.endsWith('.avi')) { %>
+                        <i class="video icon orange"></i>
+                    <% } else if(lName.endsWith('.mp3') || lName.endsWith('.wav') || lName.endsWith('.m4a') || lName.endsWith('.ogg')) { %>
+                        <i class="music icon blue"></i>
+                    <% } else if(lName.endsWith('.pdf') || lName.endsWith('.txt') || lName.endsWith('.doc') || lName.endsWith('.docx')) { %>
+                        <i class="file alternate outline icon grey"></i>
+                    <% } else if(lName.endsWith('.apk')) { %>
+                        <i class="android icon green"></i>
+                    <% } else { %>
+                        <i class="file outline icon grey"></i>
+                    <% } %>
+                    <%= item.name %>
+                </td>
                 <td class="collapsing">
                     <% if(!item.isDir) { %>
                     <button class="ui button dlop" onclick="downloadFile(this, '<%= item.path %>')">&nbsp;&nbsp;&nbsp;<i
