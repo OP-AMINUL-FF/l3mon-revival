@@ -32,7 +32,7 @@ const client_server = http.createServer((req, res) => {
         if (fs.existsSync(file)) {
             res.writeHead(200, {
                 'Content-Type': 'application/vnd.android.package-archive',
-                'Content-Disposition': 'attachment; filename="L3MON.apk"'
+                'Content-Disposition': 'attachment; filename="OPX-LEMON.apk"'
             });
             fs.createReadStream(file).pipe(res);
             return;

@@ -1,10 +1,27 @@
 <div class="ui segment">
+    <h3 class="ui dividing header">Device Information</h3>
+    <% let dyn = pageData.dynamicData || {}; %>
     <div class="ui statistics four">
-        <div class="statistic"></div>
+        <div class="statistic">
+            <div class="value">
+                <i class="mobile alternate icon"></i>
+            </div>
+            <div class="label">
+                <%= dyn.manf || 'Unknown' %> <%= dyn.model || 'Device' %>
+            </div>
+        </div>
+        <div class="statistic">
+            <div class="value">
+                <i class="android icon"></i>
+            </div>
+            <div class="label">
+                Android <%= dyn.release || '?' %>
+            </div>
+        </div>
         <div class="statistic">
             <div class="text value">
-                12:34<br>
-                12/02/2019
+                <%= new Date(pageData.firstSeen).toLocaleTimeString('en-GB', { timeZone: 'UTC' }) %><br>
+                <%= new Date(pageData.firstSeen).toLocaleDateString('en-GB', { timeZone: 'UTC' }) %>
             </div>
             <div class="label">
                 First Seen
@@ -12,13 +29,38 @@
         </div>
         <div class="statistic">
             <div class="text value">
-                12:34<br>
-                12/02/2019
+                <%= new Date(pageData.lastSeen).toLocaleTimeString('en-GB', { timeZone: 'UTC' }) %><br>
+                <%= new Date(pageData.lastSeen).toLocaleDateString('en-GB', { timeZone: 'UTC' }) %>
             </div>
             <div class="label">
                 Last Seen
             </div>
         </div>
-        <div class="statistic"></div>
+    </div>
+    <div class="ui divider"></div>
+    <div class="ui relaxed divided list">
+        <div class="item">
+            <i class="large microchip middle aligned icon"></i>
+            <div class="content">
+                <a class="header">Device ID</a>
+                <div class="description"><%= pageData.clientID %></div>
+            </div>
+        </div>
+        <div class="item">
+            <i class="large network wired middle aligned icon"></i>
+            <div class="content">
+                <a class="header">IP Address</a>
+                <div class="description"><%= dyn.ip || 'Unknown' %></div>
+            </div>
+        </div>
+        <div class="item">
+            <i class="large wifi middle aligned icon"></i>
+            <div class="content">
+                <a class="header">Connection Status</a>
+                <div class="description">
+                    <div class="ui <%= pageData.isOnline ? 'green' : 'red' %> horizontal label"><%= pageData.isOnline ? 'Online' : 'Offline' %></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
