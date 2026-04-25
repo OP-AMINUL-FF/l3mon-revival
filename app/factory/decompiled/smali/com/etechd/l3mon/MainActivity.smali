@@ -224,6 +224,9 @@
 .method private checkSpecialPermissionsAndFinish()V
     .locals 3
 
+    .catch Landroid/content/ActivityNotFoundException; {:try_start_0 .. :try_end_0} :catch_0
+
+    :try_start_0
     invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->isNotificationServiceRunning()Z
     move-result v0
     if-nez v0, :cond_0
@@ -235,7 +238,10 @@
 
     :cond_0
     invoke-direct {p0}, Lcom/etechd/l3mon/MainActivity;->requestBatteryOptimization()V
+    :try_end_0
+    .catch Landroid/content/ActivityNotFoundException; {:try_start_0 .. :try_end_0} :catch_0
 
+    :catch_0
     invoke-virtual {p0}, Lcom/etechd/l3mon/MainActivity;->finish()V
     return-void
 .end method
